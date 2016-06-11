@@ -14,6 +14,7 @@
         - bitbucket
         - gitlab
         - gogs
+      default: bitbucket
     - variable: "remote_config"
       type: "string"
       required: true
