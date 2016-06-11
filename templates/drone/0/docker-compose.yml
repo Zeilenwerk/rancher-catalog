@@ -44,7 +44,8 @@ db:
 
 backup:
   image: tutum/dockup
-  volumes_from: db
+  volumes_from:
+    - db
   volumes:
     - drone-db:/var/backups
   environment:
