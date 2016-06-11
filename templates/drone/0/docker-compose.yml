@@ -54,8 +54,8 @@ backup:
     AWS_DEFAULT_REGION: eu-west-1
     BACKUP_NAME: drone-db
     S3_BUCKET_NAME: drone-db
-    PATHS_TO_BACKU: "/var/backups/mysql"
-    CRON_TIME: 0 3 * * *
+    PATHS_TO_BACKUP: "/var/backups/mysql"
+    CRON_TIME: "0 3 * * *"
 
 
 ## Do not change below. Could cause data loss in upgrade.
