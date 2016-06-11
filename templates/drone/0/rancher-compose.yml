@@ -1,0 +1,75 @@
+.catalog:
+  name: Drone
+  version: latest
+  description: |
+    Drone CI Server
+  questions:
+    - variable: "remote_driver"
+      type: "enum"
+      required: true
+      label: "Remote Driver"
+      description: "Remote Git and Auth scheme"
+      options:
+        - github
+        - bitbucket
+        - gitlab
+        - gogs
+    - variable: "remote_config"
+      type: "string"
+      required: true
+      label: "Remote Config"
+      description: "Must be the full connection string. see http://readme.drone.io/setup/overview/ for more info"
+      default: "https://bitbucket.org?client_id=XXX&client_secret=XXX"
+    - variable: "public_port"
+      type: "int"
+      required: true
+      label: "Public Port"
+      default: 80
+      description: "Port that the load balancer will listen on. Must be accessible to remote driver for webhooks"
+    - variable: "db_root_pwd"
+      type: "password"
+      required: true
+      label: "MySQL Root Password"
+    - variable: "db_pwd"
+      type: "password"
+      required: true
+      label: "MySQL Password"
+      description: "Password for the drone user"
+    - variable: "aws_key"
+      type: "string"
+      required: true
+      label: "AWS Access Key ID"
+      description: "For backups"
+    - variable: "aws_secret"
+      type: "password"
+      required: true
+      label: "AWS Secret Access Key"
+      description: "For backups"
+
+lb:
+  scale: 1
+  load_balancer_config:
+    haproxy_config: {}
+  health_check:
+    port: 42
+    interval: 2000
+    unhealthy_threshold: 3
+    healthy_threshold: 2
+    response_timeout: 2000
+drone-server:
+  scale: 1
+  metadata:
+    remote_driver: "${remote_driver}"
+    remote_config: "${remote_config}"
+    database_driver: mysql
+    database_config: "drone:${db_pwd}@tcp(database:3306)/drone?parseTime=true"
+    http_proxy_on: "false"
+    debug: true
+  health_check:
+    port: 1620
+    interval: 2000
+    unhealthy_threshold: 3
+    strategy: recreate
+    request_line: GET /ping HTTP/1.0
+    healthy_threshold: 2
+    response_timeout: 2000

@@ -1,2 +1,3 @@
-# rancher-catalog
-Catalog entries for Rancher
+# Rancher Catalog
+
+This catalog provides templates created by Zeilenwerk
