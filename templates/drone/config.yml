@@ -1,5 +1,5 @@
 name: Drone
 description: |
-    Drone CI Server
+    Zeilenwerk's CI server
 version: 0.4-rancher
 category: Continuous Integration
