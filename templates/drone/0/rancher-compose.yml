@@ -1,6 +1,6 @@
 .catalog:
   name: Drone
-  version: latest
+  version: 0.4-rancher
   description: |
     Drone CI Server
   questions:
