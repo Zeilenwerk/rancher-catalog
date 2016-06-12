@@ -20,7 +20,7 @@ drone-server:
     - drone-data-volume
   labels:
     io.rancher.sidekicks: drone-data-volume, drone-daemon, drone-healthcheck
-  external_links:
+  links:
     - db:database
 
 drone-daemon:
