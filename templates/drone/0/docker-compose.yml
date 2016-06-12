@@ -1,6 +1,6 @@
 lb:
   ports:
-  - ${public_port}:8000
+  - "${public_port}:8000"
   tty: true
   image: rancher/load-balancer-service
   links:
@@ -19,13 +19,13 @@ drone-server:
   volumes_from:
     - drone-data-volume
   labels:
-    io.rancher.sidekicks: drone-data-volume,drone-daemon,drone-healthcheck
+    io.rancher.sidekicks: drone-data-volume, drone-daemon, drone-healthcheck
   external_links:
     - db:database
 
 drone-daemon:
   image: rancher/drone:0.4
-  net: 'container:drone-server'
+  net: container:drone-server
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
   volumes_from:
@@ -35,7 +35,9 @@ drone-daemon:
 db:
   image: mysql
   volumes:
-    - drone-db:/var/lib/mysql
+    - /var/lib/mysql
+  labels:
+    io.rancher.sidekicks: backup
   environment:
     MYSQL_ROOT_PASSWORD: "${db_root_pwd}"
     MYSQL_DATABASE: drone
@@ -46,16 +48,14 @@ backup:
   image: tutum/dockup
   volumes_from:
     - db
-  volumes:
-    - drone-db:/var/backups
   environment:
-    AWS_ACCESS_KEY_ID: ${aws_key}
-    AWS_SECRET_ACCESS_KEY: ${aws_secret}
+    AWS_ACCESS_KEY_ID: "${aws_key}"
+    AWS_SECRET_ACCESS_KEY: "${aws_secret}"
     AWS_DEFAULT_REGION: eu-west-1
     BACKUP_NAME: drone-db
     S3_BUCKET_NAME: drone-db
-    PATHS_TO_BACKUP: "/var/backups/mysql"
-    CRON_TIME: "0 3 * * *"
+    PATHS_TO_BACKUP: /var/lib/mysql/mysql
+    CRON_TIME: 0 3 * * *
 
 
 ## Do not change below. Could cause data loss in upgrade.
@@ -64,7 +64,7 @@ drone-data-volume:
   net: none
   command: /bin/true
   labels:
-    io.rancher.container.start_once: 'true'
+    io.rancher.container.start_once: true
   volumes:
     - /var/lib/drone
     - /etc/drone
