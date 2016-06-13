@@ -1,8 +1,9 @@
 lb:
   ports:
   - "${public_port}:8000"
+  - "80:8000"
   labels:
-    io.rancher.loadbalancer.ssl.ports: '443'
+    io.rancher.loadbalancer.ssl.ports: '${public_port}'
   tty: true
   image: rancher/load-balancer-service
   links:
