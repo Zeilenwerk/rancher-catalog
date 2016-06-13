@@ -51,6 +51,7 @@ lb:
   scale: 1
   load_balancer_config:
     haproxy_config: {}
+  default_cert: zeilenwerk.ch
   health_check:
     port: 42
     interval: 2000
