@@ -30,11 +30,11 @@
     - variable: "db_root_pwd"
       type: "password"
       required: true
-      label: "MySQL Root Password"
+      label: "DB Root Password"
     - variable: "db_pwd"
       type: "password"
       required: true
-      label: "MySQL Password"
+      label: "DB Password"
       description: "Password for the drone user"
     - variable: "aws_key"
       type: "string"
@@ -63,8 +63,8 @@ drone-server:
   metadata:
     remote_driver: "${remote_driver}"
     remote_config: "${remote_config}"
-    database_driver: mysql
-    database_config: "drone:${db_pwd}@tcp(database:3306)/drone?parseTime=true"
+    database_driver: postgres
+    database_config: "postgres://drone:${db_pwd}@database:5432/drone?sslmode=disable"
     http_proxy_on: "false"
     debug: true
   health_check:
