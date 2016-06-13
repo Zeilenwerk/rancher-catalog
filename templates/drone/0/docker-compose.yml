@@ -1,10 +1,12 @@
 lb:
   ports:
   - "${public_port}:8000"
+  labels:
+    io.rancher.loadbalancer.ssl.ports: '443'
   tty: true
   image: rancher/load-balancer-service
   links:
-  - drone-server
+  - drone-server:drone-server
   stdin_open: true
 
 drone-healthcheck:
