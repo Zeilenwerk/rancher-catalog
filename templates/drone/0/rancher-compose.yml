@@ -25,7 +25,7 @@
       type: "int"
       required: true
       label: "Public Port"
-      default: 80
+      default: 443
       description: "Port that the load balancer will listen on. Must be accessible to remote driver for webhooks"
     - variable: "db_root_pwd"
       type: "password"
