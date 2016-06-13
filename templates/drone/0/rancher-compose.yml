@@ -20,7 +20,7 @@
       required: true
       label: "Remote Config"
       description: "Must be the full connection string. see http://readme.drone.io/setup/overview/ for more info"
-      default: "https://bitbucket.org?client_id=XXX&client_secret=XXX?orgs=zeilenwerk"
+      default: "https://bitbucket.org?client_id=XXX&client_secret=XXX"
     - variable: "public_port"
       type: "int"
       required: true
