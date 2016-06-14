@@ -37,8 +37,9 @@ drone-daemon:
 
 db:
   image: postgres
+  volume_driver: convoy-gluster
   volumes:
-    - /var/lib/postgresql/data
+    - drone-db:/var/lib/postgresql/data
   labels:
     io.rancher.sidekicks: backup
   environment:
