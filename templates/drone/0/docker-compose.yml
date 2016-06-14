@@ -49,8 +49,9 @@ db:
 
 backup:
   image: tutum/dockup
-  volumes_from:
-    - db
+  volume_driver:
+  volumes:
+    - drone-db:/var/lib/postgresql/data
   environment:
     AWS_ACCESS_KEY_ID: "${aws_key}"
     AWS_SECRET_ACCESS_KEY: "${aws_secret}"
