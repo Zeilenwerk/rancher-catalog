@@ -37,7 +37,6 @@ drone-daemon:
 
 db:
   image: postgres
-  volume_driver: convoy-gluster
   volumes:
     - drone-db:/var/lib/postgresql/data
   labels:
@@ -48,18 +47,19 @@ db:
     POSTGRES_PASSWORD: "${db_pwd}"
 
 backup:
-  image: tutum/dockup
-  volume_driver: convoy-gluster
+  image: frekele/helicopterizer
   volumes:
-    - drone-db:/var/lib/postgresql/data
+    - drone-db:/data/db
+  restart: always
+  command: backup --tarball
   environment:
-    AWS_ACCESS_KEY_ID: "${aws_key}"
-    AWS_SECRET_ACCESS_KEY: "${aws_secret}"
+    STORAGE_PROVIDER: AWS
+    CRON_SCHEDULE: 0 3 * * *
+    BACKUP_NAME: "drone-${remote_driver}"
+    AWS_ACCESS_KEY_ID: "${aws_access_key_id}"
+    AWS_SECRET_ACCESS_KEY: "${aws_secret_access_key}"
+    AWS_S3_BUCKET_NAME: zw-drone-backups
     AWS_DEFAULT_REGION: eu-west-1
-    BACKUP_NAME: drone-db
-    S3_BUCKET_NAME: drone-db
-    PATHS_TO_BACKUP: /var/lib/postgresql/data
-    CRON_TIME: 0 3 * * *
 
 
 ## Do not change below. Could cause data loss in upgrade.
