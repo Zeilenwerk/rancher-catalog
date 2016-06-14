@@ -40,8 +40,8 @@ db:
   volume_driver: convoy-gluster
   volumes:
     - drone-db:/var/lib/postgresql/data
-  labels:
-    io.rancher.sidekicks: backup
+#   labels:
+#     io.rancher.sidekicks: backup
   environment:
     POSTGRES_DB: drone
     POSTGRES_USER: drone
