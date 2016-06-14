@@ -42,7 +42,6 @@ db:
   labels:
     io.rancher.sidekicks: backup
   environment:
-    POSTGRES_DB: drone
     POSTGRES_USER: drone
     POSTGRES_PASSWORD: "${db_pwd}"
 
