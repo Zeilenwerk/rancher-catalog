@@ -49,7 +49,7 @@ db:
 
 backup:
   image: tutum/dockup
-  volume_driver:
+  volume_driver: convoy-gluster
   volumes:
     - drone-db:/var/lib/postgresql/data
   environment:
