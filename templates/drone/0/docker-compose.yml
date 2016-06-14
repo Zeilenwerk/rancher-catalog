@@ -47,18 +47,18 @@ db:
     POSTGRES_USER: drone
     POSTGRES_PASSWORD: "${db_pwd}"
 
-backup:
-  image: tutum/dockup
-  volumes_from:
-    - db
-  environment:
-    AWS_ACCESS_KEY_ID: "${aws_key}"
-    AWS_SECRET_ACCESS_KEY: "${aws_secret}"
-    AWS_DEFAULT_REGION: eu-west-1
-    BACKUP_NAME: drone-db
-    S3_BUCKET_NAME: drone-db
-    PATHS_TO_BACKUP: /var/lib/postgresql/data
-    CRON_TIME: 0 3 * * *
+# backup:
+#   image: tutum/dockup
+#   volumes_from:
+#     - db
+#   environment:
+#     AWS_ACCESS_KEY_ID: "${aws_key}"
+#     AWS_SECRET_ACCESS_KEY: "${aws_secret}"
+#     AWS_DEFAULT_REGION: eu-west-1
+#     BACKUP_NAME: drone-db
+#     S3_BUCKET_NAME: drone-db
+#     PATHS_TO_BACKUP: /var/lib/postgresql/data
+#     CRON_TIME: 0 3 * * *
 
 
 ## Do not change below. Could cause data loss in upgrade.
