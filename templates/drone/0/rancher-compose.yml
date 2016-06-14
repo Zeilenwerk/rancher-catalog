@@ -60,7 +60,7 @@ drone-server:
     remote_driver: "${remote_driver}"
     remote_config: "${remote_config}"
     database_driver: postgres
-    database_config: "drone:${db_pwd}@database:5432/drone?sslmode=disable"
+    database_config: "postgres://drone:${db_pwd}@database:5432/drone?sslmode=disable"
     http_proxy_on: "false"
     debug: true
   health_check:
