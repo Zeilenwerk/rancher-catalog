@@ -38,7 +38,7 @@ drone-daemon:
 db:
   image: postgres
   volumes:
-    - drone-db:/var/lib/postgresql/data
+    - /var/lib/postgresql/data
   labels:
     io.rancher.sidekicks: backup
   environment:
@@ -47,12 +47,13 @@ db:
 
 backup:
   image: frekele/helicopterizer
-  volumes:
-    - drone-db:/data/db
+  volumes_from:
+    - db
   restart: always
   command: backup --tarball
   environment:
     STORAGE_PROVIDER: AWS
+    DATA_PATH: /var/lib/postgresql/data
     CRON_SCHEDULE: 0 3 * * *
     BACKUP_NAME: "drone-${remote_driver}"
     AWS_ACCESS_KEY_ID: "${aws_key}"
