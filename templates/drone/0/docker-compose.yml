@@ -11,14 +11,14 @@ lb:
   stdin_open: true
 
 drone-healthcheck:
-  image: rancher/drone-config
+  image: rancher/drone-config:v0.1.0
   net: 'container:drone-server'
   volumes_from:
     - drone-data-volume
   entrypoint: /giddyup health
 
 drone-server:
-  image: rancher/drone-config
+  image: rancher/drone-config:v0.1.0
   volumes_from:
     - drone-data-volume
   labels:
