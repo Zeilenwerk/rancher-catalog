@@ -11,14 +11,14 @@ lb:
   stdin_open: true
 
 drone-healthcheck:
-  image: rancher/drone-config:v0.1.0
+  image: rancher/drone-config
   net: 'container:drone-server'
   volumes_from:
     - drone-data-volume
   entrypoint: /giddyup health
 
 drone-server:
-  image: rancher/drone-config:v0.1.0
+  image: rancher/drone-config
   volumes_from:
     - drone-data-volume
   labels:
@@ -27,7 +27,7 @@ drone-server:
     - db:database
 
 drone-daemon:
-  image: rancher/drone:0.4
+  image: drone/drone
   net: container:drone-server
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
