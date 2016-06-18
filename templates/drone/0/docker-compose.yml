@@ -61,7 +61,6 @@ backup:
     AWS_S3_BUCKET_NAME: zw-drone-backups
     AWS_DEFAULT_REGION: eu-west-1
 
-
 ## Do not change below. Could cause data loss in upgrade.
 drone-data-volume:
   image: busybox
