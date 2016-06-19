@@ -13,14 +13,20 @@ lb:
 drone-healthcheck:
   image: rancher/drone-config:v0.1.0
   net: 'container:drone-server'
-  volumes_from:
-    - drone-data-volume
+  volume_driver: convoy-gluster
+  volumes:
+    - drone-lib:/var/lib/drone
+    - drone-etc:/etc/drone
+    - drone-opt:/opt/rancher
   entrypoint: /giddyup health
 
 drone-server:
   image: rancher/drone-config:v0.1.0
-  volumes_from:
-    - drone-data-volume
+  volume_driver: convoy-gluster
+  volumes:
+    - drone-lib:/var/lib/drone
+    - drone-etc:/etc/drone
+    - drone-opt:/opt/rancher
   labels:
     io.rancher.sidekicks: drone-data-volume, drone-daemon, drone-healthcheck
   links:
@@ -29,16 +35,19 @@ drone-server:
 drone-daemon:
   image: rancher/drone:0.4
   net: container:drone-server
+  volume_driver: convoy-gluster
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
-  volumes_from:
-    - drone-data-volume
+    - drone-lib:/var/lib/drone
+    - drone-etc:/etc/drone
+    - drone-opt:/opt/rancher
   entrypoint: /opt/rancher/rancher_entry.sh
 
 db:
   image: postgres
+  volume_driver: convoy-gluster
   volumes:
-    - /var/lib/postgresql/data
+    - drone-db:/var/lib/postgresql/data
   labels:
     io.rancher.sidekicks: backup
   environment:
@@ -47,13 +56,13 @@ db:
 
 backup:
   image: frekele/helicopterizer
-  volumes_from:
-    - db
+  volume_driver: convoy-gluster
+  volumes:
+    - drone-db:/data
   restart: always
   command: backup --tarball
   environment:
     STORAGE_PROVIDER: AWS
-    DATA_PATH: /var/lib/postgresql/data
     CRON_SCHEDULE: 0 3 * * *
     BACKUP_NAME: "drone-${remote_driver}"
     AWS_ACCESS_KEY_ID: "${aws_key}"
@@ -68,7 +77,8 @@ drone-data-volume:
   command: /bin/true
   labels:
     io.rancher.container.start_once: true
+  volume_driver: convoy-gluster
   volumes:
-    - /var/lib/drone
-    - /etc/drone
-    - /opt/rancher
+    - drone-lib:/var/lib/drone
+    - drone-etc:/etc/drone
+    - drone-opt:/opt/rancher
