@@ -3,8 +3,8 @@ lb:
   tty: true
   stdin_open: true
   ports:
-  - 5000:5000/tcp
-  - ${portus_port}:443/tcp
+    - 5000:5000/tcp
+    - ${portus_port}:443/tcp
   labels:
     io.rancher.loadbalancer.target.sslproxy: ${portus_port}=443
     io.rancher.loadbalancer.target.registry: 5000=5000
@@ -12,18 +12,19 @@ lb:
     io.rancher.scheduler.affinity:not_host_label: lb=0
     io.rancher.scheduler.affinity:not_host_label: registry.enabled=false
   links:
-  - registry:registry
-  - sslproxy:sslproxy
+    - registry:registry
+    - sslproxy:sslproxy
 
 sslproxy:
   image: nginx
   tty: true
   stdin_open: true
   links:
-  - portus:portus
+    - portus:portus
+  volume_driver: convoy-gluster
   volumes:
-  - /var/registry/certs:/etc/nginx/certs:ro
-  - /var/registry/proxy:/etc/nginx/conf.d:ro
+    - registry-certs:/etc/nginx/certs:ro
+    - registry-proxy:/etc/nginx/conf.d:ro
   labels:
     io.rancher.scheduler.affinity:container_label_soft: registry.portus.db=1
 
@@ -49,11 +50,12 @@ portus:
     REGISTRY_NAME: Registry
   tty: true
   stdin_open: true
+  volume_driver: convoy-gluster
   volumes:
-  - /var/registry/certs:/certs
-  - /var/registry/proxy:/etc/nginx/conf.d
+    - registry-certs:/certs
+    - registry-proxy:/etc/nginx/conf.d
   links:
-  - db:db
+    - db:db
   labels:
     io.rancher.container.pull_image: always
     io.rancher.scheduler.affinity:container_label_soft: registry.portus.db=1
@@ -81,31 +83,35 @@ registry:
   tty: true
   stdin_open: true
   links:
-  - portus:portus
+    - portus:portus
+  volume_driver: convoy-gluster
   volumes:
-  - /var/registry/certs:/certs
-  - /var/registry/data:/var/lib/registry
+    - registry-certs:/certs
+    - registry-data:/var/lib/registry
 
 db:
   image: mysql
+  tty: true
+  stdin_open: true
+  volume_driver: convoy-gluster
+  volumes:
+    - registry-db:/var/lib/mysql
+  labels:
+    registry.portus.db: 1
+    io.rancher.sidekicks: backup
   environment:
     MYSQL_DATABASE: portus
     MYSQL_ROOT_PASSWORD: "${db_root_pwd}"
     MYSQL_USER: portus
     MYSQL_PASSWORD: "${db_pwd}"
-  tty: true
-  stdin_open: true
-  volumes:
-  - /var/registry/db:/var/lib/mysql
-  labels:
-    registry.portus.db: 1
 
 backup:
   image: frekele/helicopterizer
-  volumes_from:
-    - db
   restart: always
   command: backup --tarball
+  volume_driver: convoy-gluster
+  volumes:
+    - registry-db:/var/lib/mysql
   environment:
     STORAGE_PROVIDER: AWS
     DATA_PATH: /var/lib/mysql
