@@ -28,7 +28,7 @@ drone-server:
     - drone-etc:/etc/drone
     - drone-opt:/opt/rancher
   labels:
-    io.rancher.sidekicks: drone-data-volume, drone-daemon, drone-healthcheck
+    io.rancher.sidekicks: drone-daemon, drone-healthcheck
   links:
     - db:database
 
@@ -69,16 +69,3 @@ backup:
     AWS_SECRET_ACCESS_KEY: "${aws_secret}"
     AWS_S3_BUCKET_NAME: zw-drone-backups
     AWS_DEFAULT_REGION: eu-west-1
-
-## Do not change below. Could cause data loss in upgrade.
-drone-data-volume:
-  image: busybox
-  net: none
-  command: /bin/true
-  labels:
-    io.rancher.container.start_once: true
-  volume_driver: convoy-gluster
-  volumes:
-    - drone-lib:/var/lib/drone
-    - drone-etc:/etc/drone
-    - drone-opt:/opt/rancher
