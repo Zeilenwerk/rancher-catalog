@@ -1,0 +1,5 @@
+name: Registry
+description: |
+    Zeilenwerk's Docker registry
+version: 2
+category: Docker Registry

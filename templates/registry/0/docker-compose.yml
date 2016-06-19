@@ -1,0 +1,117 @@
+lb:
+  image: rancher/load-balancer-service
+  tty: true
+  stdin_open: true
+  ports:
+  - 5000:5000/tcp
+  - ${portus_port}:443/tcp
+  labels:
+    io.rancher.loadbalancer.target.sslproxy: ${portus_port}=443
+    io.rancher.loadbalancer.target.registry: 5000=5000
+    io.rancher.scheduler.global: 'true'
+    io.rancher.scheduler.affinity:not_host_label: lb=0
+    io.rancher.scheduler.affinity:not_host_label: registry.enabled=false
+  links:
+  - registry:registry
+  - sslproxy:sslproxy
+
+sslproxy:
+  image: nginx
+  tty: true
+  stdin_open: true
+  links:
+  - portus:portus
+  volumes:
+  - /var/registry/certs:/etc/nginx/certs:ro
+  - /var/registry/proxy:/etc/nginx/conf.d:ro
+  labels:
+    io.rancher.scheduler.affinity:container_label_soft: registry.portus.db=1
+
+portus:
+  image: sshipway/portus
+  environment:
+    PORTUS_MACHINE_FQDN: registry.zeilenwerk.ch
+    PORTUS_PRODUCTION_HOST: db
+    PORTUS_PRODUCTION_DATABASE: portus
+    PORTUS_PRODUCTION_USERNAME: portus
+    PORTUS_PRODUCTION_PASSWORD: "${db_pwd}"
+    PORTUS_GRAVATAR_ENABLED: true
+    PORTUS_KEY_PATH: /certs/registry.key
+    PORTUS_PASSWORD: "${db_pwd}"
+    PORTUS_SECRET_KEY_BASE: "${db_root_pwd}"
+    PORTUS_CHECK_SSL_USAGE_ENABLED: true
+    PORTUS_SMTP_ENABLED: false
+    PORTUS_LDAP_ENABLED: false
+    PORTUS_PORT: ${portus_port}
+    REGISTRY_SSL_ENABLED: true
+    REGISTRY_HOSTNAME: registry.zeilenwerk.ch
+    REGISTRY_PORT: 5000
+    REGISTRY_NAME: Registry
+  tty: true
+  stdin_open: true
+  volumes:
+  - /var/registry/certs:/certs
+  - /var/registry/proxy:/etc/nginx/conf.d
+  links:
+  - db:db
+  labels:
+    io.rancher.container.pull_image: always
+    io.rancher.scheduler.affinity:container_label_soft: registry.portus.db=1
+    registry.portus.app: 1
+
+registry:
+  image: registry
+  environment:
+    REGISTRY_LOG_LEVEL: warn
+    REGISTRY_STORAGE_DELETE_ENABLED: true
+    REGISTRY_AUTH: token
+    REGISTRY_AUTH_TOKEN_REALM: "https://registry.zeilenwerk.ch:${portus_port}/v2/token"
+    REGISTRY_AUTH_TOKEN_SERVICE: registry.zeilenwerk.ch:5000
+    REGISTRY_AUTH_TOKEN_ISSUER: registry.zeilenwerk.ch
+    REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/registry.crt
+    REGISTRY_HTTP_TLS_CERTIFICATE: /certs/registry.crt
+    REGISTRY_HTTP_TLS_KEY: /certs/registry.key
+    REGISTRY_HTTP_SECRET: httpsecret
+    REGISTRY_NOTIFICATIONS_ENDPOINTS: >
+      - name: portus
+        url: http://portus:3000/v2/webhooks/events
+        timeout: 500
+        threshold: 5
+        backoff: 1
+  tty: true
+  stdin_open: true
+  links:
+  - portus:portus
+  volumes:
+  - /var/registry/certs:/certs
+  - /var/registry/data:/var/lib/registry
+
+db:
+  image: mysql
+  environment:
+    MYSQL_DATABASE: portus
+    MYSQL_ROOT_PASSWORD: "${db_root_pwd}"
+    MYSQL_USER: portus
+    MYSQL_PASSWORD: "${db_pwd}"
+  tty: true
+  stdin_open: true
+  volumes:
+  - /var/registry/db:/var/lib/mysql
+  labels:
+    registry.portus.db: 1
+
+backup:
+  image: frekele/helicopterizer
+  volumes_from:
+    - db
+  restart: always
+  command: backup --tarball
+  environment:
+    STORAGE_PROVIDER: AWS
+    DATA_PATH: /var/lib/mysql
+    CRON_SCHEDULE: 0 3 * * *
+    BACKUP_NAME: "registry"
+    AWS_ACCESS_KEY_ID: "${aws_key}"
+    AWS_SECRET_ACCESS_KEY: "${aws_secret}"
+    AWS_S3_BUCKET_NAME: zw-registry-backups
+    AWS_DEFAULT_REGION: eu-west-1

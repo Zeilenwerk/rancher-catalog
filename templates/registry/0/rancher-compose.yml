@@ -1,0 +1,43 @@
+.catalog:
+  name: "Registry"
+  version: "2"
+  description: |
+    Docker Registry
+  questions:
+    - variable: "portus_port"
+      label: "Admin Port"
+      description: "Port on which to run the SSL Portus administration service and API"
+      default: 443
+      required: true
+      type: "int"
+    - variable: "db_pwd"
+      label: "DB Password"
+      description: "Password for Portus database access, must be 8 characters or longer"
+      required: true
+      type: "password"
+    - variable: "db_root_pwd"
+      label: "DB Root Password"
+      description: "Root Password for MySQL database, must be 8 characters or longer.  This is not normally used."
+      required: true
+      type: "password"
+    - variable: "aws_key"
+      type: "string"
+      required: true
+      label: "AWS Access Key ID"
+      description: "For backups"
+    - variable: "aws_secret"
+      type: "password"
+      required: true
+      label: "AWS Secret Access Key"
+      description: "For backups"
+
+lb:
+  load_balancer_config:
+    haproxy_config: {}
+  default_cert: zeilenwerk.ch
+  health_check:
+    port: 42
+    interval: 2000
+    unhealthy_threshold: 3
+    healthy_threshold: 2
+    response_timeout: 2000
