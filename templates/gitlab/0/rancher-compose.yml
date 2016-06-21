@@ -1,0 +1,43 @@
+.catalog:
+  name: Gitlab
+  version: latest
+  description: |
+    Gitlab Git Server
+  questions:
+    - variable: "public_port"
+      type: "int"
+      required: true
+      label: "Public Port"
+      default: 443
+      description: "Port that the load balancer will listen on"
+    - variable: "root_pwd"
+      type: "password"
+      required: true
+      label: "Root User Password"
+      description: "Password for the root user of Gitlab"
+    - variable: "db_pwd"
+      type: "password"
+      required: true
+      label: "DB Password"
+      description: "Password for the drone user"
+    - variable: "aws_key"
+      type: "string"
+      required: true
+      label: "AWS Access Key ID"
+      description: "For backups"
+    - variable: "aws_secret"
+      type: "password"
+      required: true
+      label: "AWS Secret Access Key"
+      description: "For backups"
+
+lb:
+  load_balancer_config:
+    haproxy_config: {}
+  default_cert: zeilenwerk.ch
+  health_check:
+    port: 42
+    interval: 2000
+    unhealthy_threshold: 3
+    healthy_threshold: 2
+    response_timeout: 2000

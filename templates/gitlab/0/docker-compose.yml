@@ -1,0 +1,62 @@
+lb:
+  ports:
+  - "${public_port}:443"
+  - "180:80"
+  - "122:22"
+  labels:
+    io.rancher.loadbalancer.ssl.ports: '${public_port}'
+  tty: true
+  restart: always
+  image: rancher/load-balancer-service
+  links:
+  - server
+  stdin_open: true
+
+server:
+  image: gitlab/gitlab-ce
+  volumes:
+    - gitlab-config:/etc/gitlab
+    - gitlab-logs:/var/log/gitlab
+  volume_driver: convoy-gluster
+  links:
+    - db
+  environment:
+    RAILS_ENV: production
+    GITLAB_ROOT_PASSWORD: ${root_pwd}
+    GITLAB_HOST: https://git.zeilenwerk.ch
+    GITLAB_EMAIL_FROM: git@zeilenwerk.ch
+    GITLAB_EMAIL_DISPLAY_NAME: Zeilenwerk Gitlab
+    GITLAB_DATABASE_HOST: db
+    GITLAB_DATABASE_USERNAME: gitlab
+    GITLAB_DATABASE_PASSWORD: ${db_pwd}
+    GITLAB_OMNIBUS_CONFIG: "external_url 'https://git.zeilenwerk.ch/'; gitlab_rails['lfs_enabled'] = true;"
+
+db:
+  image: postgres
+  restart: always
+  volumes:
+    - drone-db:/var/lib/postgresql/data
+  labels:
+    io.rancher.sidekicks: backup
+  environment:
+    POSTGRES_DB: gitlab_production
+    POSTGRES_USER: gitlab
+    POSTGRES_PASSWORD: "${db_pwd}"
+
+backup:
+  image: frekele/helicopterizer
+  volume_driver: convoy-gluster
+  volumes:
+    - gitlab-data:/data/data
+    - gitlab-config:/data/config
+    - gitlab-logs:/data/logs
+  restart: always
+  command: backup --tarball
+  environment:
+    STORAGE_PROVIDER: AWS
+    CRON_SCHEDULE: 0 3 * * *
+    BACKUP_NAME: "gitlab"
+    AWS_ACCESS_KEY_ID: "${aws_key}"
+    AWS_SECRET_ACCESS_KEY: "${aws_secret}"
+    AWS_S3_BUCKET_NAME: zw-gitlab-backups
+    AWS_DEFAULT_REGION: eu-west-1
