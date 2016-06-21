@@ -2,6 +2,7 @@ lb:
   ports:
   - "${public_port}:8000"
   - "80:8000"
+  restart: always
   labels:
     io.rancher.loadbalancer.ssl.ports: '${public_port}'
   tty: true
@@ -12,6 +13,7 @@ lb:
 
 drone-healthcheck:
   image: rancher/drone-config:v0.1.0
+  restart: always
   net: 'container:drone-server'
   volume_driver: convoy-gluster
   volumes:
@@ -22,6 +24,7 @@ drone-healthcheck:
 
 drone-server:
   image: rancher/drone-config:v0.1.0
+  restart: always
   volume_driver: convoy-gluster
   volumes:
     - drone-lib:/var/lib/drone
@@ -34,6 +37,7 @@ drone-server:
 
 drone-daemon:
   image: rancher/drone:0.4
+  restart: always
   net: container:drone-server
   volume_driver: convoy-gluster
   volumes:
@@ -45,13 +49,14 @@ drone-daemon:
 
 db:
   image: postgres
+  restart: always
   volume_driver: convoy-gluster
   volumes:
-    - drone-db:/var/lib/postgresql/data
+    - gitlab-db:/var/lib/postgresql/data
   labels:
     io.rancher.sidekicks: backup
   environment:
-    POSTGRES_USER: drone
+    POSTGRES_USER: gitlab
     POSTGRES_PASSWORD: "${db_pwd}"
 
 backup:

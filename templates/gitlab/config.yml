@@ -1,0 +1,5 @@
+name: Gitlab
+description: |
+    Zeilenwerk's Git server
+version: latest
+category: Git

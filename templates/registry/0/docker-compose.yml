@@ -1,5 +1,6 @@
 lb:
   image: rancher/load-balancer-service
+  restart: always
   tty: true
   stdin_open: true
   ports:
@@ -12,15 +13,16 @@ lb:
     io.rancher.scheduler.affinity:not_host_label: lb=0
     io.rancher.scheduler.affinity:not_host_label: registry.enabled=false
   links:
-    - registry:registry
-    - sslproxy:sslproxy
+    - registry
+    - sslproxy
 
 sslproxy:
   image: nginx
+  restart: always
   tty: true
   stdin_open: true
   links:
-    - portus:portus
+    - portus
   volume_driver: convoy-gluster
   volumes:
     - registry-certs:/etc/nginx/certs:ro
@@ -30,6 +32,7 @@ sslproxy:
 
 portus:
   image: sshipway/portus
+  restart: always
   environment:
     PORTUS_MACHINE_FQDN: registry.zeilenwerk.ch
     PORTUS_PRODUCTION_HOST: db
@@ -55,7 +58,7 @@ portus:
     - registry-certs:/certs
     - registry-proxy:/etc/nginx/conf.d
   links:
-    - db:db
+    - db
   labels:
     io.rancher.container.pull_image: always
     io.rancher.scheduler.affinity:container_label_soft: registry.portus.db=1
@@ -63,6 +66,7 @@ portus:
 
 registry:
   image: registry
+  restart: always
   environment:
     REGISTRY_LOG_LEVEL: warn
     REGISTRY_STORAGE_DELETE_ENABLED: true
@@ -91,6 +95,7 @@ registry:
 
 db:
   image: mysql
+  restart: always
   tty: true
   stdin_open: true
   volume_driver: convoy-gluster
@@ -111,10 +116,9 @@ backup:
   command: backup --tarball
   volume_driver: convoy-gluster
   volumes:
-    - registry-db:/var/lib/mysql
+    - registry-db:/data
   environment:
     STORAGE_PROVIDER: AWS
-    DATA_PATH: /var/lib/mysql
     CRON_SCHEDULE: 0 3 * * *
     BACKUP_NAME: "registry"
     AWS_ACCESS_KEY_ID: "${aws_key}"
